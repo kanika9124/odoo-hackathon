@@ -1,0 +1,543 @@
+import React, { useState, useEffect } from 'react';
+import { Calendar, MapPin, DollarSign, Plus, Search, Clock, Users, Share2, Settings, TrendingUp, X, Edit2, Trash2, Eye, ChevronRight, Globe, Plane, Hotel, Utensils, Camera } from 'lucide-react';
+
+const GlobalTrotters = () => {
+  const [currentView, setCurrentView] = useState('login');
+  const [currentUser, setCurrentUser] = useState(null);
+  const [trips, setTrips] = useState([]);
+  const [selectedTrip, setSelectedTrip] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Sample data
+  const sampleCities = [
+    { id: 1, name: 'Paris', country: 'France', costIndex: 4, popularity: 95, image: '🗼' },
+    { id: 2, name: 'Tokyo', country: 'Japan', costIndex: 5, popularity: 92, image: '🗾' },
+    { id: 3, name: 'Barcelona', country: 'Spain', costIndex: 3, popularity: 88, image: '🏖️' },
+    { id: 4, name: 'New York', country: 'USA', costIndex: 5, popularity: 90, image: '🗽' },
+    { id: 5, name: 'Bali', country: 'Indonesia', costIndex: 2, popularity: 87, image: '🏝️' },
+    { id: 6, name: 'Rome', country: 'Italy', costIndex: 3, popularity: 89, image: '🏛️' },
+  ];
+
+  const sampleActivities = [
+    { id: 1, name: 'Eiffel Tower Visit', type: 'Sightseeing', cost: 30, duration: '2h', cityId: 1 },
+    { id: 2, name: 'Louvre Museum', type: 'Culture', cost: 20, duration: '3h', cityId: 1 },
+    { id: 3, name: 'Senso-ji Temple', type: 'Culture', cost: 0, duration: '1.5h', cityId: 2 },
+    { id: 4, name: 'Shibuya Crossing Tour', type: 'Sightseeing', cost: 15, duration: '1h', cityId: 2 },
+    { id: 5, name: 'Sagrada Familia', type: 'Architecture', cost: 26, duration: '2h', cityId: 3 },
+    { id: 6, name: 'Beach Day', type: 'Leisure', cost: 10, duration: '4h', cityId: 3 },
+  ];
+
+  useEffect(() => {
+    if (currentUser) {
+      const userTrips = [
+        {
+          id: 1,
+          name: 'European Adventure',
+          startDate: '2026-06-15',
+          endDate: '2026-06-25',
+          description: 'Exploring the best of Europe',
+          stops: [
+            { cityId: 1, arrivalDate: '2026-06-15', departureDate: '2026-06-18', activities: [1, 2] },
+            { cityId: 3, arrivalDate: '2026-06-19', departureDate: '2026-06-22', activities: [5, 6] },
+          ],
+          budget: 3500,
+          isPublic: true
+        },
+        {
+          id: 2,
+          name: 'Asian Discovery',
+          startDate: '2026-08-10',
+          endDate: '2026-08-20',
+          description: 'A journey through Japan and Indonesia',
+          stops: [
+            { cityId: 2, arrivalDate: '2026-08-10', departureDate: '2026-08-15', activities: [3, 4] },
+            { cityId: 5, arrivalDate: '2026-08-16', departureDate: '2026-08-20', activities: [] },
+          ],
+          budget: 4000,
+          isPublic: false
+        }
+      ];
+      setTrips(userTrips);
+    }
+  }, [currentUser]);
+
+  const handleLogin = (email, password) => {
+    setCurrentUser({ id: 1, name: 'Alex Morgan', email });
+    setCurrentView('dashboard');
+  };
+
+  const handleSignup = (name, email, password) => {
+    setCurrentUser({ id: 1, name, email });
+    setCurrentView('dashboard');
+  };
+
+  const calculateTripCost = (trip) => {
+    let total = 0;
+    trip.stops.forEach(stop => {
+      const days = Math.ceil((new Date(stop.departureDate) - new Date(stop.arrivalDate)) / (1000 * 60 * 60 * 24));
+      total += days * 100; // accommodation
+      total += days * 50; // meals
+      stop.activities.forEach(actId => {
+        const activity = sampleActivities.find(a => a.id === actId);
+        if (activity) total += activity.cost;
+      });
+    });
+    return total;
+  };
+
+  // Login Screen
+  const LoginScreen = () => {
+    const [isSignup, setIsSignup] = useState(false);
+    const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+
+    const handleSubmit = (e) => {
+      e.preventDefault();
+      if (isSignup) {
+        handleSignup(formData.name, formData.email, formData.password);
+      } else {
+        handleLogin(formData.email, formData.password);
+      }
+    };
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mb-4">
+              <Globe className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">GlobalTrotters</h1>
+            <p className="text-gray-600">Plan your dream journey</p>
+          </div>
+
+          <div className="space-y-4">
+            {isSignup && (
+              <input
+                type="text"
+                placeholder="Full Name"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
+            )}
+            <input
+              type="email"
+              placeholder="Email"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            />
+            <button
+              onClick={handleSubmit}
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition"
+            >
+              {isSignup ? 'Sign Up' : 'Login'}
+            </button>
+          </div>
+
+          <div className="mt-6 text-center">
+            <button
+              onClick={() => setIsSignup(!isSignup)}
+              className="text-purple-600 hover:text-purple-700 font-medium"
+            >
+              {isSignup ? 'Already have an account? Login' : "Don't have an account? Sign Up"}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Dashboard
+  const Dashboard = () => (
+    <div className="space-y-6">
+      <div className="bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl p-8 text-white">
+        <h2 className="text-3xl font-bold mb-2">Welcome back, {currentUser.name}! ✈️</h2>
+        <p className="text-blue-100">Ready for your next adventure?</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white rounded-xl p-6 shadow-md">
+          <div className="flex items-center justify-between mb-2">
+            <Plane className="w-8 h-8 text-blue-500" />
+            <span className="text-2xl font-bold text-gray-800">{trips.length}</span>
+          </div>
+          <p className="text-gray-600">Active Trips</p>
+        </div>
+        <div className="bg-white rounded-xl p-6 shadow-md">
+          <div className="flex items-center justify-between mb-2">
+            <MapPin className="w-8 h-8 text-green-500" />
+            <span className="text-2xl font-bold text-gray-800">{trips.reduce((acc, t) => acc + t.stops.length, 0)}</span>
+          </div>
+          <p className="text-gray-600">Cities to Visit</p>
+        </div>
+        <div className="bg-white rounded-xl p-6 shadow-md">
+          <div className="flex items-center justify-between mb-2">
+            <DollarSign className="w-8 h-8 text-purple-500" />
+            <span className="text-2xl font-bold text-gray-800">${trips.reduce((acc, t) => acc + calculateTripCost(t), 0)}</span>
+          </div>
+          <p className="text-gray-600">Total Budget</p>
+        </div>
+      </div>
+
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xl font-bold text-gray-800">Your Upcoming Trips</h3>
+          <button
+            onClick={() => setCurrentView('create-trip')}
+            className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-lg hover:shadow-lg transition"
+          >
+            <Plus className="w-4 h-4" />
+            Plan New Trip
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {trips.map(trip => (
+            <div key={trip.id} className="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition cursor-pointer" onClick={() => {
+              setSelectedTrip(trip);
+              setCurrentView('trip-detail');
+            }}>
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h4 className="text-lg font-bold text-gray-800 mb-1">{trip.name}</h4>
+                  <p className="text-sm text-gray-600">{trip.description}</p>
+                </div>
+                {trip.isPublic && <Share2 className="w-5 h-5 text-blue-500" />}
+              </div>
+              <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
+                <div className="flex items-center gap-1">
+                  <Calendar className="w-4 h-4" />
+                  {new Date(trip.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(trip.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </div>
+                <div className="flex items-center gap-1">
+                  <MapPin className="w-4 h-4" />
+                  {trip.stops.length} stops
+                </div>
+              </div>
+              <div className="flex items-center justify-between pt-4 border-t">
+                <span className="text-lg font-bold text-purple-600">${calculateTripCost(trip)}</span>
+                <ChevronRight className="w-5 h-5 text-gray-400" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-xl font-bold text-gray-800 mb-4">Popular Destinations</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          {sampleCities.map(city => (
+            <div key={city.id} className="bg-white rounded-xl p-4 shadow-md hover:shadow-xl transition cursor-pointer text-center">
+              <div className="text-4xl mb-2">{city.image}</div>
+              <h5 className="font-bold text-gray-800">{city.name}</h5>
+              <p className="text-xs text-gray-600">{city.country}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  // Create Trip Screen
+  const CreateTripScreen = () => {
+    const [tripData, setTripData] = useState({
+      name: '',
+      startDate: '',
+      endDate: '',
+      description: '',
+      budget: ''
+    });
+
+    const handleCreate = () => {
+      const newTrip = {
+        id: trips.length + 1,
+        ...tripData,
+        stops: [],
+        isPublic: false
+      };
+      setTrips([...trips, newTrip]);
+      setSelectedTrip(newTrip);
+      setCurrentView('itinerary-builder');
+    };
+
+    return (
+      <div className="max-w-2xl mx-auto">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">Create New Trip</h2>
+        <div className="bg-white rounded-xl p-6 shadow-md space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Trip Name</label>
+            <input
+              type="text"
+              placeholder="e.g., Summer in Europe"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+              value={tripData.name}
+              onChange={(e) => setTripData({ ...tripData, name: e.target.value })}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+              <input
+                type="date"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                value={tripData.startDate}
+                onChange={(e) => setTripData({ ...tripData, startDate: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+              <input
+                type="date"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                value={tripData.endDate}
+                onChange={(e) => setTripData({ ...tripData, endDate: e.target.value })}
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+            <textarea
+              placeholder="What's this trip about?"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+              rows="3"
+              value={tripData.description}
+              onChange={(e) => setTripData({ ...tripData, description: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Budget (USD)</label>
+            <input
+              type="number"
+              placeholder="5000"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+              value={tripData.budget}
+              onChange={(e) => setTripData({ ...tripData, budget: e.target.value })}
+            />
+          </div>
+          <button
+            onClick={handleCreate}
+            disabled={!tripData.name || !tripData.startDate || !tripData.endDate}
+            className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition disabled:opacity-50"
+          >
+            Create Trip & Add Destinations
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  // Trip Detail View
+  const TripDetailView = () => {
+    if (!selectedTrip) return null;
+
+    const totalCost = calculateTripCost(selectedTrip);
+    const costBreakdown = {
+      accommodation: selectedTrip.stops.reduce((acc, s) => {
+        const days = Math.ceil((new Date(s.departureDate) - new Date(s.arrivalDate)) / (1000 * 60 * 60 * 24));
+        return acc + days * 100;
+      }, 0),
+      meals: selectedTrip.stops.reduce((acc, s) => {
+        const days = Math.ceil((new Date(s.departureDate) - new Date(s.arrivalDate)) / (1000 * 60 * 60 * 24));
+        return acc + days * 50;
+      }, 0),
+      activities: selectedTrip.stops.reduce((acc, s) => {
+        return acc + s.activities.reduce((sum, actId) => {
+          const act = sampleActivities.find(a => a.id === actId);
+          return sum + (act ? act.cost : 0);
+        }, 0);
+      }, 0)
+    };
+
+    return (
+      <div className="space-y-6">
+        <div className="bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl p-8 text-white">
+          <div className="flex items-start justify-between">
+            <div>
+              <h2 className="text-3xl font-bold mb-2">{selectedTrip.name}</h2>
+              <p className="text-blue-100 mb-4">{selectedTrip.description}</p>
+              <div className="flex items-center gap-4 text-sm">
+                <div className="flex items-center gap-1">
+                  <Calendar className="w-4 h-4" />
+                  {new Date(selectedTrip.startDate).toLocaleDateString()} - {new Date(selectedTrip.endDate).toLocaleDateString()}
+                </div>
+                <div className="flex items-center gap-1">
+                  <MapPin className="w-4 h-4" />
+                  {selectedTrip.stops.length} stops
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => setCurrentView('itinerary-builder')}
+              className="bg-white text-purple-600 px-4 py-2 rounded-lg font-semibold hover:shadow-lg transition flex items-center gap-2"
+            >
+              <Edit2 className="w-4 h-4" />
+              Edit
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white rounded-xl p-6 shadow-md">
+            <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <DollarSign className="w-5 h-5 text-purple-500" />
+              Budget Overview
+            </h3>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b">
+                <div className="flex items-center gap-2">
+                  <Hotel className="w-4 h-4 text-blue-500" />
+                  <span className="text-gray-600">Accommodation</span>
+                </div>
+                <span className="font-bold text-gray-800">${costBreakdown.accommodation}</span>
+              </div>
+              <div className="flex items-center justify-between pb-2 border-b">
+                <div className="flex items-center gap-2">
+                  <Utensils className="w-4 h-4 text-green-500" />
+                  <span className="text-gray-600">Meals</span>
+                </div>
+                <span className="font-bold text-gray-800">${costBreakdown.meals}</span>
+              </div>
+              <div className="flex items-center justify-between pb-2 border-b">
+                <div className="flex items-center gap-2">
+                  <Camera className="w-4 h-4 text-purple-500" />
+                  <span className="text-gray-600">Activities</span>
+                </div>
+                <span className="font-bold text-gray-800">${costBreakdown.activities}</span>
+              </div>
+              <div className="flex items-center justify-between pt-2">
+                <span className="font-bold text-gray-800">Total</span>
+                <span className="text-2xl font-bold text-purple-600">${totalCost}</span>
+              </div>
+              {selectedTrip.budget && (
+                <div className="mt-4 p-3 bg-purple-50 rounded-lg">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Budget</span>
+                    <span className="font-bold">${selectedTrip.budget}</span>
+                  </div>
+                  <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full ${totalCost > selectedTrip.budget ? 'bg-red-500' : 'bg-green-500'}`}
+                      style={{ width: `${Math.min((totalCost / selectedTrip.budget) * 100, 100)}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl p-6 shadow-md">
+            <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-blue-500" />
+              Itinerary
+            </h3>
+            <div className="space-y-4">
+              {selectedTrip.stops.map((stop, idx) => {
+                const city = sampleCities.find(c => c.id === stop.cityId);
+                const days = Math.ceil((new Date(stop.departureDate) - new Date(stop.arrivalDate)) / (1000 * 60 * 60 * 24));
+                return (
+                  <div key={idx} className="border-l-4 border-purple-500 pl-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-2xl">{city?.image}</span>
+                      <div>
+                        <h4 className="font-bold text-gray-800">{city?.name}</h4>
+                        <p className="text-sm text-gray-600">{days} days</p>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500 mb-2">
+                      {new Date(stop.arrivalDate).toLocaleDateString()} - {new Date(stop.departureDate).toLocaleDateString()}
+                    </p>
+                    {stop.activities.length > 0 && (
+                      <div className="space-y-1">
+                        {stop.activities.map(actId => {
+                          const activity = sampleActivities.find(a => a.id === actId);
+                          return activity ? (
+                            <div key={actId} className="text-sm text-gray-600 flex items-center gap-2">
+                              <Camera className="w-3 h-3" />
+                              {activity.name} (${activity.cost})
+                            </div>
+                          ) : null;
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Main Layout
+  const Layout = ({ children }) => (
+    <div className="min-h-screen bg-gray-50">
+      {currentUser && (
+        <nav className="bg-white shadow-md">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center gap-2 cursor-pointer" onClick={() => setCurrentView('dashboard')}>
+                <Globe className="w-8 h-8 text-purple-500" />
+                <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
+                  GlobalTrotters
+                </span>
+              </div>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setCurrentView('dashboard')}
+                  className="text-gray-600 hover:text-purple-600 transition"
+                >
+                  Dashboard
+                </button>
+                <button
+                  onClick={() => setCurrentView('my-trips')}
+                  className="text-gray-600 hover:text-purple-600 transition"
+                >
+                  My Trips
+                </button>
+                <button
+                  onClick={() => setCurrentView('create-trip')}
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-lg hover:shadow-lg transition"
+                >
+                  New Trip
+                </button>
+                <div className="flex items-center gap-2 ml-4">
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                    {currentUser.name.charAt(0)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </nav>
+      )}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {children}
+      </main>
+    </div>
+  );
+
+  // Render based on current view
+  if (!currentUser) {
+    return <LoginScreen />;
+  }
+
+  return (
+    <Layout>
+      {currentView === 'dashboard' && <Dashboard />}
+      {currentView === 'create-trip' && <CreateTripScreen />}
+      {currentView === 'trip-detail' && <TripDetailView />}
+      {currentView === 'my-trips' && <Dashboard />}
+    </Layout>
+  );
+};
+
+export default GlobalTrotters;
